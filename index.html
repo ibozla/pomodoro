@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pomodoro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@900&display=swap" rel="stylesheet">
     <style>
@@ -16,83 +16,113 @@
             --long: #5C7FB8;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
+        * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
 
         body {
             background: var(--bg);
             font-family: 'Inter', sans-serif;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; color: var(--text);
-            padding: 60px 20px;
-            overflow-y: auto;
+            padding: 20px; /* ลด Padding ลงสำหรับมือถือ */
         }
 
         .container {
-            width: 100%; max-width: 420px; padding: 60px 40px 50px;
-            background: var(--glass); backdrop-filter: blur(20px);
-            border-radius: 50px; border: 1px solid rgba(255,255,255,0.5);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.05); text-align: center;
+            width: 100%;
+            max-width: 420px;
+            padding: clamp(30px, 8%, 60px) clamp(20px, 5%, 40px);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 40px; /* โค้งมนนุ่มนวลขึ้น */
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.05);
+            text-align: center;
         }
 
         .header { 
-            font-size: 0.75rem; font-weight: 800; color: var(--text);
-            margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;
-            opacity: 0.7;
+            font-size: 0.7rem; font-weight: 800; color: var(--text);
+            margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px;
+            opacity: 0.6;
         }
 
-        .modes { display: flex; gap: 8px; background: rgba(0,0,0,0.04); padding: 6px; border-radius: 20px; margin-bottom: 40px; }
+        .modes { 
+            display: flex; gap: 6px; background: rgba(0,0,0,0.04); 
+            padding: 5px; border-radius: 16px; margin-bottom: 30px; 
+        }
         .mode-btn { 
-            flex: 1; border: none; background: transparent; padding: 10px; border-radius: 15px; 
-            font-size: 0.7rem; font-weight: 700; cursor: pointer; color: var(--sub); text-transform: uppercase; 
+            flex: 1; border: none; background: transparent; padding: 12px 5px; 
+            border-radius: 12px; font-size: 0.65rem; font-weight: 700; 
+            cursor: pointer; color: var(--sub); text-transform: uppercase; 
         }
         .mode-btn.active { background: white; color: var(--text); box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
 
-        .timer-wrap { margin-bottom: 45px; position: relative; }
+        .timer-wrap { margin-bottom: 30px; position: relative; }
+        
+        /* 🔥 ปรับขนาดตัวเลขให้นุ่มนวลตามขนาดหน้าจอ */
         #timer-input { 
-            font-family: 'Poppins', sans-serif; font-size: 7.5rem; font-weight: 900; 
+            font-family: 'Poppins', sans-serif; 
+            font-size: clamp(5rem, 25vw, 7.5rem); 
+            font-weight: 900; 
             width: 100%; text-align: center; border: none; background: transparent; 
-            outline: none; letter-spacing: -6px; cursor: pointer; border-bottom: 2px solid transparent;
+            outline: none; letter-spacing: -4px; cursor: pointer;
+            border-bottom: 2px solid transparent;
+            line-height: 1;
         }
         #timer-input:hover { border-bottom-color: rgba(0,0,0,0.05); }
         .focus-txt { color: var(--focus); }
         .short-txt { color: var(--short); }
         .long-txt { color: var(--long); }
 
-        .hint { font-size: 0.7rem; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; }
+        .hint { font-size: 0.65rem; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; }
 
-        .actions { display: flex; gap: 15px; margin: 40px 0; }
-        .btn { flex: 1; padding: 20px; border-radius: 24px; border: none; cursor: pointer; font-size: 1rem; font-weight: 800; font-family: 'Inter'; }
+        .actions { display: flex; gap: 12px; margin: 30px 0; }
+        .btn { 
+            flex: 1; padding: 18px; border-radius: 20px; border: none; 
+            cursor: pointer; font-size: 1rem; font-weight: 800; font-family: 'Inter'; 
+        }
         .btn-main { background: var(--text); color: white; }
         .btn-sub { background: white; color: var(--sub); border: 1px solid rgba(0,0,0,0.05); }
-        .btn:active { transform: scale(0.96); }
+        .btn:active { transform: scale(0.95); }
 
-        .stats { display: flex; justify-content: space-around; padding: 25px 0; border-top: 1px solid rgba(0,0,0,0.05); }
-        .stat-label { font-size: 0.6rem; font-weight: 800; color: var(--sub); text-transform: uppercase; margin-bottom: 4px; }
-        .stat-val { font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 800; }
+        .stats { display: flex; justify-content: space-around; padding: 20px 0; border-top: 1px solid rgba(0,0,0,0.05); }
+        .stat-label { font-size: 0.55rem; font-weight: 800; color: var(--sub); text-transform: uppercase; margin-bottom: 4px; }
+        .stat-val { font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 800; }
 
-        .log-input-wrap { display: flex; background: rgba(0,0,0,0.03); border-radius: 18px; padding: 5px 5px 5px 18px; margin-top: 10px; }
-        #log-input { flex: 1; border: none; background: transparent; outline: none; font-size: 0.85rem; font-weight: 600; color: var(--text); }
-        .log-add { background: transparent; border: none; font-size: 1.4rem; cursor: pointer; color: var(--sub); }
+        .log-input-wrap { 
+            display: flex; background: rgba(0,0,0,0.03); border-radius: 15px; 
+            padding: 2px 2px 2px 15px; margin-top: 10px; 
+        }
+        #log-input { 
+            flex: 1; border: none; background: transparent; outline: none; 
+            font-size: 0.9rem; font-weight: 600; color: var(--text); padding: 12px 0;
+        }
+        .log-add { background: transparent; border: none; font-size: 1.4rem; cursor: pointer; color: var(--sub); padding: 0 15px; }
         
-        .log-list { max-height: 100px; overflow-y: auto; margin: 15px 0 0; padding: 0; list-style: none; text-align: left; }
-        .log-item { display: flex; font-size: 0.8rem; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.02); justify-content: space-between; align-items: center; }
+        .log-list { max-height: 120px; overflow-y: auto; margin: 15px 0 0; padding: 0; list-style: none; text-align: left; }
+        .log-item { display: flex; font-size: 0.8rem; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.02); justify-content: space-between; align-items: center; }
         .log-time { font-weight: 800; color: var(--sub); margin-right: 12px; font-size: 0.7rem; }
-        .log-del { color: #e2e8f0; cursor: pointer; border: none; background: none; font-size: 1.1rem; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.1); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: white; width: 340px; padding: 45px; border-radius: 45px; text-align: center; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.15); }
-        .modal-btn { width: 100%; padding: 18px; border-radius: 24px; border: none; font-weight: 800; cursor: pointer; margin-top: 25px; font-family: 'Inter'; background: var(--text); color: white; font-size: 1rem; }
+        /* Modal - Responsive */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .modal { background: white; width: 100%; max-width: 340px; padding: 35px; border-radius: 35px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .modal-btn { width: 100%; padding: 16px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer; margin-top: 20px; font-family: 'Inter'; background: var(--text); color: white; }
 
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+        /* ปรับปรุงหน้าตาบนหน้าจอเล็กมาก */
+        @media (max-width: 360px) {
+            .container { padding: 30px 20px; }
+            .btn { padding: 15px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="modal-overlay" id="modal">
     <div class="modal">
-        <div id="m-title" style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px;">Done!</div>
-        <div id="m-body" style="font-size: 0.9rem; color: var(--sub); line-height: 1.5;">Take a breather.</div>
+        <div id="m-title" style="font-weight: 800; font-size: 1.2rem; margin-bottom: 8px;">Done!</div>
+        <div id="m-body" style="font-size: 0.85rem; color: var(--sub); line-height: 1.4;">Ready for a break?</div>
         <button class="modal-btn" onclick="closeModal()">CONTINUE</button>
     </div>
 </div>
@@ -108,6 +138,7 @@
 
     <div class="timer-wrap">
         <input type="text" id="timer-input" class="focus-txt" value="25:00" 
+               inputmode="decimal"
                oninput="this.value = this.value.replace(/[^0-9:]/g, '')" 
                onblur="validate()" onfocus="pause()">
         <div class="hint" id="hint">Next: Short Break</div>
@@ -130,7 +161,7 @@
     </div>
 
     <div class="log-input-wrap">
-        <input type="text" id="log-input" placeholder="What are you doing?" onkeydown="if(event.key==='Enter') saveLog()">
+        <input type="text" id="log-input" placeholder="Doing what?" onkeydown="if(event.key==='Enter') saveLog()">
         <button class="log-add" onclick="saveLog()">→</button>
     </div>
     <ul class="log-list" id="log-list"></ul>
@@ -181,13 +212,8 @@
         }
     }
 
-    function pause() { 
-        clearInterval(timerId); 
-        isRunning = false; 
-        document.getElementById('play-btn').innerText = 'START'; 
-    }
-
-    // ฟังก์ชัน Reset ที่ปรับปรุงแล้ว: หยุดเวลาและตั้งค่าใหม่
+    function pause() { clearInterval(timerId); isRunning = false; document.getElementById('play-btn').innerText = 'START'; }
+    
     function reset() { 
         pause(); 
         timeLeft = baseTime; 
@@ -199,7 +225,7 @@
         if(currentMode === 'focus') {
             sessions++; addLog(`Focus Finished #${sessions} ✅`);
             const isLong = sessions % 4 === 0;
-            openModal(isLong ? "Awesome!" : "Focus Done", isLong ? "Ready for a long break?" : "Time for a short break.", () => setMode(isLong ? 'long' : 'short'));
+            openModal(isLong ? "Set Complete!" : "Focus Done", isLong ? "Ready for a 15-min break?" : "Ready for a 5-min break.", () => setMode(isLong ? 'long' : 'short'));
         } else openModal("Break Over", "Ready to focus?", () => setMode('focus'));
     }
 
@@ -207,12 +233,13 @@
         const input = document.getElementById('log-input');
         if(!input.value.trim()) return;
         addLog(input.value.trim()); input.value = "";
+        input.blur(); // ซ่อนคีย์บอร์ดบนมือถือหลังพิมพ์เสร็จ
     }
 
     function addLog(txt) {
         const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
         const li = document.createElement('li'); li.className = 'log-item';
-        li.innerHTML = `<span><span class="log-time">${time}</span>${txt}</span><button class="log-del" onclick="this.parentElement.remove();">×</button>`;
+        li.innerHTML = `<span><span class="log-time">${time}</span>${txt}</span><button style="color:#e2e8f0;border:none;background:none;font-size:1.1rem" onclick="this.parentElement.remove();">×</button>`;
         document.getElementById('log-list').prepend(li);
     }
 
@@ -220,7 +247,7 @@
     function closeModal() { const o = document.getElementById('modal'); o.style.display = 'none'; if(o.cb) o.cb(); }
 
     function beep() {
-        const c = new AudioContext();
+        const c = new (window.AudioContext || window.webkitAudioContext)();
         [0, 0.6, 1.2].forEach(l => { [0, 0.13, 0.26].forEach(t => {
             const o = c.createOscillator(), g = c.createGain();
             o.type = 'triangle'; o.frequency.setValueAtTime(1500, c.currentTime + l + t);
