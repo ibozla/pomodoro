@@ -23,7 +23,8 @@
             font-family: 'Inter', sans-serif;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; color: var(--text);
-            padding: 40px 20px;
+            padding: 60px 20px;
+            overflow-y: auto;
         }
 
         .container {
@@ -33,7 +34,6 @@
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.05); text-align: center;
         }
 
-        /* 1. Simple Date Header */
         .header { 
             font-size: 0.75rem; font-weight: 800; color: var(--text);
             margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;
@@ -130,7 +130,7 @@
     </div>
 
     <div class="log-input-wrap">
-        <input type="text" id="log-input" placeholder="Current activity..." onkeydown="if(event.key==='Enter') saveLog()">
+        <input type="text" id="log-input" placeholder="What are you doing?" onkeydown="if(event.key==='Enter') saveLog()">
         <button class="log-add" onclick="saveLog()">→</button>
     </div>
     <ul class="log-list" id="log-list"></ul>
@@ -140,7 +140,6 @@
     let timeLeft = 1500, timerId = null, isRunning = false;
     let sessions = 0, totalSeconds = 0, currentMode = 'focus', baseTime = 1500;
 
-    // ทุกอย่าง Reset ใหม่ทุกครั้งที่โหลดหน้า
     window.onload = () => {
         document.getElementById('date-text').textContent = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', weekday: 'long' });
         updateUI();
@@ -182,15 +181,25 @@
         }
     }
 
-    function pause() { clearInterval(timerId); isRunning = false; document.getElementById('play-btn').innerText = 'START'; }
-    function reset() { timeLeft = baseTime; updateUI(); }
+    function pause() { 
+        clearInterval(timerId); 
+        isRunning = false; 
+        document.getElementById('play-btn').innerText = 'START'; 
+    }
+
+    // ฟังก์ชัน Reset ที่ปรับปรุงแล้ว: หยุดเวลาและตั้งค่าใหม่
+    function reset() { 
+        pause(); 
+        timeLeft = baseTime; 
+        updateUI(); 
+    }
 
     function end() {
         pause(); beep();
         if(currentMode === 'focus') {
             sessions++; addLog(`Focus Finished #${sessions} ✅`);
             const isLong = sessions % 4 === 0;
-            openModal(isLong ? "Set Complete!" : "Focus Done", isLong ? "Ready for a long break?" : "Time for a short break.", () => setMode(isLong ? 'long' : 'short'));
+            openModal(isLong ? "Awesome!" : "Focus Done", isLong ? "Ready for a long break?" : "Time for a short break.", () => setMode(isLong ? 'long' : 'short'));
         } else openModal("Break Over", "Ready to focus?", () => setMode('focus'));
     }
 
