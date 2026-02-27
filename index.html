@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f6f1eb;
+            --glass: rgba(255, 255, 255, 0.75);
+            --text: #1e293b;
+            --sub: #94a3b8;
+            --focus: #4A7B7A;
+            --short: #C97E70;
+            --long: #5C7FB8;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; color: var(--text);
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%; max-width: 420px; padding: 60px 40px 50px;
+            background: var(--glass); backdrop-filter: blur(20px);
+            border-radius: 50px; border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.05); text-align: center;
+        }
+
+        /* 1. Simple Date Header */
+        .header { 
+            font-size: 0.75rem; font-weight: 800; color: var(--text);
+            margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;
+            opacity: 0.7;
+        }
+
+        .modes { display: flex; gap: 8px; background: rgba(0,0,0,0.04); padding: 6px; border-radius: 20px; margin-bottom: 40px; }
+        .mode-btn { 
+            flex: 1; border: none; background: transparent; padding: 10px; border-radius: 15px; 
+            font-size: 0.7rem; font-weight: 700; cursor: pointer; color: var(--sub); text-transform: uppercase; 
+        }
+        .mode-btn.active { background: white; color: var(--text); box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+
+        .timer-wrap { margin-bottom: 45px; position: relative; }
+        #timer-input { 
+            font-family: 'Poppins', sans-serif; font-size: 7.5rem; font-weight: 900; 
+            width: 100%; text-align: center; border: none; background: transparent; 
+            outline: none; letter-spacing: -6px; cursor: pointer; border-bottom: 2px solid transparent;
+        }
+        #timer-input:hover { border-bottom-color: rgba(0,0,0,0.05); }
+        .focus-txt { color: var(--focus); }
+        .short-txt { color: var(--short); }
+        .long-txt { color: var(--long); }
+
+        .hint { font-size: 0.7rem; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; }
+
+        .actions { display: flex; gap: 15px; margin: 40px 0; }
+        .btn { flex: 1; padding: 20px; border-radius: 24px; border: none; cursor: pointer; font-size: 1rem; font-weight: 800; font-family: 'Inter'; }
+        .btn-main { background: var(--text); color: white; }
+        .btn-sub { background: white; color: var(--sub); border: 1px solid rgba(0,0,0,0.05); }
+        .btn:active { transform: scale(0.96); }
+
+        .stats { display: flex; justify-content: space-around; padding: 25px 0; border-top: 1px solid rgba(0,0,0,0.05); }
+        .stat-label { font-size: 0.6rem; font-weight: 800; color: var(--sub); text-transform: uppercase; margin-bottom: 4px; }
+        .stat-val { font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 800; }
+
+        .log-input-wrap { display: flex; background: rgba(0,0,0,0.03); border-radius: 18px; padding: 5px 5px 5px 18px; margin-top: 10px; }
+        #log-input { flex: 1; border: none; background: transparent; outline: none; font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .log-add { background: transparent; border: none; font-size: 1.4rem; cursor: pointer; color: var(--sub); }
+        
+        .log-list { max-height: 100px; overflow-y: auto; margin: 15px 0 0; padding: 0; list-style: none; text-align: left; }
+        .log-item { display: flex; font-size: 0.8rem; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.02); justify-content: space-between; align-items: center; }
+        .log-time { font-weight: 800; color: var(--sub); margin-right: 12px; font-size: 0.7rem; }
+        .log-del { color: #e2e8f0; cursor: pointer; border: none; background: none; font-size: 1.1rem; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.1); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; width: 340px; padding: 45px; border-radius: 45px; text-align: center; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.15); }
+        .modal-btn { width: 100%; padding: 18px; border-radius: 24px; border: none; font-weight: 800; cursor: pointer; margin-top: 25px; font-family: 'Inter'; background: var(--text); color: white; font-size: 1rem; }
+
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <div id="m-title" style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px;">Done!</div>
+        <div id="m-body" style="font-size: 0.9rem; color: var(--sub); line-height: 1.5;">Take a breather.</div>
+        <button class="modal-btn" onclick="closeModal()">CONTINUE</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="header" id="date-text">---</div>
+
+    <div class="modes">
+        <button class="mode-btn active" id="m-focus" onclick="setMode('focus')">Focus</button>
+        <button class="mode-btn" id="m-short" onclick="setMode('short')">Short</button>
+        <button class="mode-btn" id="m-long" onclick="setMode('long')">Long</button>
+    </div>
+
+    <div class="timer-wrap">
+        <input type="text" id="timer-input" class="focus-txt" value="25:00" 
+               oninput="this.value = this.value.replace(/[^0-9:]/g, '')" 
+               onblur="validate()" onfocus="pause()">
+        <div class="hint" id="hint">Next: Short Break</div>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-main" onclick="toggle()" id="play-btn">START</button>
+        <button class="btn btn-sub" onclick="reset()">RESET</button>
+    </div>
+
+    <div class="stats">
+        <div style="text-align: left;">
+            <div class="stat-label">Hours Focused</div>
+            <div class="stat-val" id="total">0h 00m</div>
+        </div>
+        <div style="text-align: right;">
+            <div class="stat-label">Focus Finished</div>
+            <div class="stat-val" id="count">0</div>
+        </div>
+    </div>
+
+    <div class="log-input-wrap">
+        <input type="text" id="log-input" placeholder="Current activity..." onkeydown="if(event.key==='Enter') saveLog()">
+        <button class="log-add" onclick="saveLog()">→</button>
+    </div>
+    <ul class="log-list" id="log-list"></ul>
+</div>
+
+<script>
+    let timeLeft = 1500, timerId = null, isRunning = false;
+    let sessions = 0, totalSeconds = 0, currentMode = 'focus', baseTime = 1500;
+
+    // ทุกอย่าง Reset ใหม่ทุกครั้งที่โหลดหน้า
+    window.onload = () => {
+        document.getElementById('date-text').textContent = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', weekday: 'long' });
+        updateUI();
+    };
+
+    window.onkeydown = (e) => { 
+        if(e.key === "Escape") closeModal(); 
+        if(e.code === "Space" && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); toggle(); } 
+    };
+
+    function setMode(m) {
+        pause(); currentMode = m;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.id === 'm-'+m));
+        document.getElementById('timer-input').className = m + '-txt';
+        baseTime = m === 'focus' ? 1500 : (m === 'short' ? 300 : 900);
+        timeLeft = baseTime;
+        updateUI();
+    }
+
+    function updateUI() {
+        const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+        const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        document.getElementById('timer-input').value = timeStr;
+        document.title = `${timeStr} - Pomodoro`;
+        document.getElementById('hint').innerText = currentMode === 'focus' ? ((sessions + 1) % 4 === 0 ? "Next: Long Break" : "Next: Short Break") : "Next: Focus Session";
+        document.getElementById('count').innerText = sessions;
+        const h = Math.floor(totalSeconds / 3600), min = Math.floor((totalSeconds % 3600) / 60);
+        document.getElementById('total').innerText = `${h}h ${min.toString().padStart(2, '0')}m`;
+    }
+
+    function toggle() {
+        if(isRunning) pause();
+        else {
+            isRunning = true; document.getElementById('play-btn').innerText = 'PAUSE';
+            timerId = setInterval(() => {
+                timeLeft--; if(currentMode === 'focus') totalSeconds++;
+                updateUI(); if(timeLeft <= 0) end();
+            }, 1000);
+        }
+    }
+
+    function pause() { clearInterval(timerId); isRunning = false; document.getElementById('play-btn').innerText = 'START'; }
+    function reset() { timeLeft = baseTime; updateUI(); }
+
+    function end() {
+        pause(); beep();
+        if(currentMode === 'focus') {
+            sessions++; addLog(`Focus Finished #${sessions} ✅`);
+            const isLong = sessions % 4 === 0;
+            openModal(isLong ? "Set Complete!" : "Focus Done", isLong ? "Ready for a long break?" : "Time for a short break.", () => setMode(isLong ? 'long' : 'short'));
+        } else openModal("Break Over", "Ready to focus?", () => setMode('focus'));
+    }
+
+    function saveLog() {
+        const input = document.getElementById('log-input');
+        if(!input.value.trim()) return;
+        addLog(input.value.trim()); input.value = "";
+    }
+
+    function addLog(txt) {
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        const li = document.createElement('li'); li.className = 'log-item';
+        li.innerHTML = `<span><span class="log-time">${time}</span>${txt}</span><button class="log-del" onclick="this.parentElement.remove();">×</button>`;
+        document.getElementById('log-list').prepend(li);
+    }
+
+    function openModal(t, b, cb) { document.getElementById('m-title').innerText = t; document.getElementById('m-body').innerText = b; const o = document.getElementById('modal'); o.style.display = 'flex'; o.cb = cb; }
+    function closeModal() { const o = document.getElementById('modal'); o.style.display = 'none'; if(o.cb) o.cb(); }
+
+    function beep() {
+        const c = new AudioContext();
+        [0, 0.6, 1.2].forEach(l => { [0, 0.13, 0.26].forEach(t => {
+            const o = c.createOscillator(), g = c.createGain();
+            o.type = 'triangle'; o.frequency.setValueAtTime(1500, c.currentTime + l + t);
+            g.gain.setValueAtTime(0, c.currentTime + l + t);
+            g.gain.linearRampToValueAtTime(0.15, c.currentTime + l + t + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + l + t + 0.06);
+            o.connect(g).connect(c.destination); o.start(c.currentTime + l + t); o.stop(c.currentTime + l + t + 0.06);
+        })});
+    }
+
+    function validate() {
+        let v = document.getElementById('timer-input').value;
+        if(!v.includes(':')) v += ":00";
+        const [m, s] = v.split(':').map(n => parseInt(n) || 0);
+        timeLeft = (m * 60) + (s > 59 ? 59 : s); updateUI();
+    }
+</script>
+</body>
+</html>
